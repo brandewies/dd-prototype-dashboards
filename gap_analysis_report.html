@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Due Diligence Gap Analysis Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header .date {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .summary-card .number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .summary-card .label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .categories {
+            padding: 40px;
+        }
+        
+        .category {
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .category-header {
+            background: #f8f9fa;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .category-header:hover {
+            background: #e9ecef;
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .category-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .completeness-bar {
+            width: 200px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .completeness-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .completeness-fill.high { background: #10b981; }
+        .completeness-fill.medium { background: #f59e0b; }
+        .completeness-fill.low { background: #ef4444; }
+        
+        .completeness-text {
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        .completeness-text.high { color: #10b981; }
+        .completeness-text.medium { color: #f59e0b; }
+        .completeness-text.low { color: #ef4444; }
+        
+        .category-body {
+            padding: 20px;
+            display: none;
+            background: white;
+        }
+        
+        .category-body.expanded {
+            display: block;
+        }
+        
+        .files-section, .missing-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .file-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-left: 3px solid #10b981;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .file-summary {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .missing-item {
+            padding: 8px 12px;
+            background: #fff1f2;
+            border-left: 3px solid #ef4444;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .expand-icon {
+            transition: transform 0.2s;
+        }
+        
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 14px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Due Diligence Gap Analysis</h1>
+            <div class="date">Generated on February 08, 2026 at 12:11 PM</div>
+        </div>
+        
+        <div class="summary">
+            <div class="summary-card">
+                <div class="number">11/14</div>
+                <div class="label">Categories Covered</div>
+            </div>
+            <div class="summary-card">
+                <div class="number">27%</div>
+                <div class="label">Overall Completeness</div>
+            </div>
+            <div class="summary-card">
+                <div class="number">15</div>
+                <div class="label">Documents Analyzed</div>
+            </div>
+        </div>
+        
+        <div class="categories">
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">FINANCIAL STATEMENTS</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill high" style="width: 66.66666666666666%"></div>
+                        </div>
+                        <div class="completeness-text high">67%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (2)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_FY25_Q4_Results.pdf</div>
+                                <div class="file-summary">This is Microsoft's official quarterly earnings report (Form EX-99.1) for Q4 FY2025, containing comprehensive audited financial statements including i...</div>
+                            </div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_10K_Acquisition_AB.pdf</div>
+                                <div class="file-summary">This is Microsoft's 10-K filing documenting their completed $75.4 billion acquisition of Activision Blizzard, including detailed purchase price alloca...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (3)  </div>
+
+                            <div class="missing-item">Recent unaudited financial statements</div>
+
+                            <div class="missing-item">Financial projections (2025-2028)</div>
+
+                            <div class="missing-item">Cash flow projections</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">EMPLOYEES</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill medium" style="width: 50.0%"></div>
+                        </div>
+                        <div class="completeness-text medium">50%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (2)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_DeferredCompensationPlan.pdf</div>
+                                <div class="file-summary">This is Microsoft's Deferred Compensation Plan document, amended and restated effective April 1, 2024, which allows select executives and highly compe...</div>
+                            </div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_InsiderTradingPolicy.pdf</div>
+                                <div class="file-summary">This is Microsoft's General Insider Trading Policy (Exhibit 19.1) that governs employee trading restrictions when in possession of material, nonpublic...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (4)  </div>
+
+                            <div class="missing-item">Employment agreements</div>
+
+                            <div class="missing-item">Consulting agreements</div>
+
+                            <div class="missing-item">Management agreements</div>
+
+                            <div class="missing-item">Incentive compensation programs</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">AUDIT DOCUMENTATION</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill medium" style="width: 50.0%"></div>
+                        </div>
+                        <div class="completeness-text medium">50%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_ConsentOfAccountingFirm.pdf</div>
+                                <div class="file-summary">This is a Consent of Independent Registered Public Accounting Firm from Deloitte & Touche LLP, dated July 30, 2025, consenting to the incorporation by...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (2)  </div>
+
+                            <div class="missing-item">Management letters from auditors</div>
+
+                            <div class="missing-item">Audit correspondence</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">REGULATORY MATTERS</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill medium" style="width: 50.0%"></div>
+                        </div>
+                        <div class="completeness-text medium">50%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_Cybersecurity_Notice.pdf</div>
+                                <div class="file-summary">This is a Microsoft SEC filing (Exhibit 99.1) disclosing a cybersecurity incident involving a Russian state-sponsored threat actor called Midnight Bli...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (2)  </div>
+
+                            <div class="missing-item">Licensing documentation</div>
+
+                            <div class="missing-item">Regulatory compliance documentation</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">CORPORATE</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill medium" style="width: 42.857142857142854%"></div>
+                        </div>
+                        <div class="completeness-text medium">43%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (3)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">Microsoft_ArticlesOfIncorporation.pdf</div>
+                                <div class="file-summary">This document contains Microsoft Corporation's complete Bylaws, which establish the fundamental governance structure including shareholder meeting pro...</div>
+                            </div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_SUBSIDIARIES-OF-REGISTRANT.pdf</div>
+                                <div class="file-summary">This is Microsoft Corporation's official Exhibit 21 filing listing subsidiaries as of June 30, 2025, which corresponds to the "Organizational charts" ...</div>
+                            </div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_Registrants_Securities_Description.pdf</div>
+                                <div class="file-summary">This is Microsoft Corporation's official description of securities registered under Section 12 of the Securities Exchange Act of 1934, detailing the c...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (7)  </div>
+
+                            <div class="missing-item">Articles of Incorporation</div>
+
+                            <div class="missing-item">Bylaws or Operating Agreements</div>
+
+                            <div class="missing-item">List of subsidiaries</div>
+
+                            <div class="missing-item">Capitalization table</div>
+
+                            <div class="missing-item">Option Plan</div>
+
+                            <div class="missing-item">Securities sale agreements</div>
+
+                            <div class="missing-item">Registration rights agreements</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">TAX MATTERS</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 25.0%"></div>
+                        </div>
+                        <div class="completeness-text low">25%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_TaxAudit_Blog.pdf</div>
+                                <div class="file-summary">This is a Microsoft blog post disclosing an ongoing IRS audit covering tax years 2004-2013, with the IRS proposing $28.9 billion in additional taxes p...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (4)  </div>
+
+                            <div class="missing-item">Federal tax returns (2 years)</div>
+
+                            <div class="missing-item">State/local tax returns (2 years)</div>
+
+                            <div class="missing-item">Foreign tax returns (2 years)</div>
+
+                            <div class="missing-item">List of tax filing jurisdictions</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">LIABILITIES</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 25.0%"></div>
+                        </div>
+                        <div class="completeness-text low">25%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_RegistrationRights_Agreement.pdf</div>
+                                <div class="file-summary">This is a Registration Rights Agreement dated November 6, 2023, between Microsoft Corporation and various dealer managers relating to Microsoft's exch...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (4)  </div>
+
+                            <div class="missing-item">Current payables aging schedule</div>
+
+                            <div class="missing-item">Long-term debt agreements</div>
+
+                            <div class="missing-item">Short-term debt agreements</div>
+
+                            <div class="missing-item">Loan agreements with officers/directors</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">MISCELLANEOUS</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 25.0%"></div>
+                        </div>
+                        <div class="completeness-text low">25%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFt_Acquisition_ActivationBlizzard_Notice.pdf</div>
+                                <div class="file-summary">This is a public press release announcing Microsoft's acquisition of Activision Blizzard for $68.7 billion, filed as an SEC exhibit. While it contains...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (4)  </div>
+
+                            <div class="missing-item">Surveys and appraisals</div>
+
+                            <div class="missing-item">Market studies</div>
+
+                            <div class="missing-item">Top 10 largest suppliers list</div>
+
+                            <div class="missing-item">Top 10 largest customers list</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">LITIGATION</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 16.666666666666664%"></div>
+                        </div>
+                        <div class="completeness-text low">17%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_10K_LegalProceedings_2025.pdf</div>
+                                <div class="file-summary">This document contains Microsoft's 10-K filing disclosure of legal proceedings, specifically detailing an ongoing Irish Data Protection Commission inv...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (6)  </div>
+
+                            <div class="missing-item">Pending litigation schedule</div>
+
+                            <div class="missing-item">Threatened litigation documentation</div>
+
+                            <div class="missing-item">Outside counsel information</div>
+
+                            <div class="missing-item">Plaintiff litigation summary</div>
+
+                            <div class="missing-item">Attorneys' opinion letters to auditors</div>
+
+                            <div class="missing-item">Attorneys' opinion letters on regulatory changes</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">PROPERTIES</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 14.285714285714285%"></div>
+                        </div>
+                        <div class="completeness-text low">14%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT_10K_Properties.pdf</div>
+                                <div class="file-summary">This is Microsoft's 10-K filing excerpt detailing their real estate holdings, including 97 million square feet of owned and leased properties across d...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (7)  </div>
+
+                            <div class="missing-item">Material leases and subleases</div>
+
+                            <div class="missing-item">Fixed assets over $50K</div>
+
+                            <div class="missing-item">Patents and trademarks list</div>
+
+                            <div class="missing-item">Patent/trademark licenses</div>
+
+                            <div class="missing-item">Intellectual property contracts</div>
+
+                            <div class="missing-item">Liens and security interests</div>
+
+                            <div class="missing-item">Insurance policies list</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">CONTRACTS</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 12.5%"></div>
+                        </div>
+                        <div class="completeness-text low">12%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (1)</div>
+
+                            <div class="file-item">
+                                <div class="file-name">MSFT-OpenAI_Partnership_Blog.pdf</div>
+                                <div class="file-summary">This document details a major partnership agreement amendment between Microsoft and OpenAI, including IP rights, revenue sharing arrangements, and a $...</div>
+                            </div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (8)  </div>
+
+                            <div class="missing-item">Joint venture agreements</div>
+
+                            <div class="missing-item">Non-compete agreements</div>
+
+                            <div class="missing-item">Customer contracts over $25K</div>
+
+                            <div class="missing-item">Supplier contracts over $25K</div>
+
+                            <div class="missing-item">Third-party consent requirements</div>
+
+                            <div class="missing-item">Acquisition communications</div>
+
+                            <div class="missing-item">Related party transactions</div>
+
+                            <div class="missing-item">Other material documents</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">LICENSES</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 0.0%"></div>
+                        </div>
+                        <div class="completeness-text low">0%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (0)</div>
+
+                            <div style="color: #999; font-style: italic; padding: 12px;">No files found in this category</div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (2)  </div>
+
+                            <div class="missing-item">Government permits and licenses</div>
+
+                            <div class="missing-item">Regulatory approvals</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">RECEIVABLES</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 0.0%"></div>
+                        </div>
+                        <div class="completeness-text low">0%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (0)</div>
+
+                            <div style="color: #999; font-style: italic; padding: 12px;">No files found in this category</div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (1)  </div>
+
+                            <div class="missing-item">Current receivables aging schedule</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-title">ENVIRONMENTAL</div>
+                    <div class="category-stats">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill low" style="width: 0.0%"></div>
+                        </div>
+                        <div class="completeness-text low">0%</div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="category-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div class="files-section">
+                            <div class="section-title">✓ Files Found (0)</div>
+
+                            <div style="color: #999; font-style: italic; padding: 12px;">No files found in this category</div>
+
+                        </div>
+                        <div class="missing-section">
+                            <div class="section-title">⚠ Required Items (1)  </div>
+
+                            <div class="missing-item">Environmental matters documentation</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="footer">
+            M&A Due Diligence Prototype • AI-Powered Document Analysis
+        </div>
+    </div>
+    
+    <script>
+        function toggleCategory(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.expand-icon');
+            body.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>

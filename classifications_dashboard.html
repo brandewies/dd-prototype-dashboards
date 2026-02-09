@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Classifications Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 2px solid #e0e0e0;
+            white-space: nowrap;
+        }
+        
+        th:hover {
+            background: #e9ecef;
+        }
+        
+        th .sort-icon {
+            margin-left: 5px;
+            opacity: 0.3;
+            font-size: 10px;
+        }
+        
+        th.sorted-asc .sort-icon {
+            opacity: 1;
+            color: #667eea;
+        }
+        
+        th.sorted-desc .sort-icon {
+            opacity: 1;
+            color: #667eea;
+            transform: rotate(180deg);
+            display: inline-block;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .filename {
+            font-weight: 600;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .filename:hover {
+            text-decoration: underline;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #e3f2fd;
+            color: #1976d2;
+            white-space: nowrap;
+        }
+        
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .priority-high { background: #dcfce7; color: #166534; }
+        .priority-medium { background: #fef3c7; color: #92400e; }
+        .priority-low { background: #fee2e2; color: #991b1b; }
+        
+        .confidence-bar {
+            width: 100px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        
+        .summary-cell {
+            max-width: 500px;
+            color: #666;
+            line-height: 1.4;
+            position: relative;
+            cursor: help;
+        }
+        
+        .summary-preview {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            background: #333;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 400px;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .summary-cell:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .notes-input {
+            width: 100%;
+            min-width: 200px;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        .notes-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .notes-input.saved {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Document Classifications Dashboard</h1>
+            <div class="subtitle">Generated on February 08, 2026 at 12:39 PM</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8.1/10</div>
+                <div class="stat-label">Avg Priority</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">95%</div>
+                <div class="stat-label">Avg Confidence</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search documents..." onkeyup="filterTable()">
+            </div>
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="categoryFilter" onchange="filterTable()">
+                    <option value="">All Categories</option>
+                    <option value="AUDIT DOCUMENTATION">AUDIT DOCUMENTATION</option>
+                    <option value="CONTRACTS">CONTRACTS</option>
+                    <option value="CORPORATE">CORPORATE</option>
+                    <option value="EMPLOYEES">EMPLOYEES</option>
+                    <option value="FINANCIAL STATEMENTS">FINANCIAL STATEMENTS</option>
+                    <option value="LIABILITIES">LIABILITIES</option>
+                    <option value="LITIGATION">LITIGATION</option>
+                    <option value="MISCELLANEOUS">MISCELLANEOUS</option>
+                    <option value="PROPERTIES">PROPERTIES</option>
+                    <option value="REGULATORY MATTERS">REGULATORY MATTERS</option>
+                    <option value="TAX MATTERS">TAX MATTERS</option>
+
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Priority:</label>
+                <select id="priorityFilter" onchange="filterTable()">
+                    <option value="">All Priorities</option>
+                    <option value="high">High (8-10)</option>
+                    <option value="medium">Medium (5-7)</option>
+                    <option value="low">Low (1-4)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Filename <span class="sort-icon">▼</span></th>
+                        <th onclick="sortTable(1)">Category <span class="sort-icon">▼</span></th>
+                        <th onclick="sortTable(2)">Priority <span class="sort-icon">▼</span></th>
+                        <th onclick="sortTable(3)">Confidence <span class="sort-icon">▼</span></th>
+                        <th>Summary</th>
+                        <th style="min-width: 220px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/Microsoft_ArticlesOfIncorporation.pdf" class="filename" target="_blank">Microsoft_ArticlesOfIncorporation.pdf</a></td>
+                        <td><span class="category-badge">CORPORATE</span></td>
+                        <td><span class="priority-badge priority-high">10</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 100%"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This document contains Microsoft Corporation's complete Bylaws, which establish the fundamental governance structure inc...</div>
+                                <div class="tooltip">This document contains Microsoft Corporation&#39;s complete Bylaws, which establish the fundamental governance structure including shareholder meeting procedures, board composition and duties, officer roles, and corporate operational requirements. Bylaws are critical M&A due diligence documents as they define how the target company is governed, voting requirements, director election procedures, and other essential corporate mechanics that directly impact deal structure and post-acquisition integration.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="Microsoft_ArticlesOfIncorporation.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFt_Acquisition_ActivationBlizzard_Notice.pdf" class="filename" target="_blank">MSFt_Acquisition_ActivationBlizzard_Notice.pdf</a></td>
+                        <td><span class="category-badge">MISCELLANEOUS</span></td>
+                        <td><span class="priority-badge priority-low">3</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is a public press release announcing Microsoft's acquisition of Activision Blizzard for $68.7 billion, filed as an ...</div>
+                                <div class="tooltip">This is a public press release announcing Microsoft&#39;s acquisition of Activision Blizzard for $68.7 billion, filed as an SEC exhibit. While it contains basic transaction terms and forward-looking statements, it&#39;s primarily a marketing/communications document rather than core due diligence material that would typically be reviewed during the confidential due diligence process.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFt_Acquisition_ActivationBlizzard_Notice.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_FY25_Q4_Results.pdf" class="filename" target="_blank">MSFT_FY25_Q4_Results.pdf</a></td>
+                        <td><span class="category-badge">FINANCIAL STATEMENTS</span></td>
+                        <td><span class="priority-badge priority-high">10</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 100%"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft's official quarterly earnings report (Form EX-99.1) for Q4 FY2025, containing comprehensive audited fi...</div>
+                                <div class="tooltip">This is Microsoft&#39;s official quarterly earnings report (Form EX-99.1) for Q4 FY2025, containing comprehensive audited financial statements including income statements, balance sheets, cash flow statements, and segment revenue analysis. This document is critical for M&A due diligence as it provides the most recent complete financial performance data, key business metrics, and forward-looking statements that would be essential for valuation and risk assessment.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_FY25_Q4_Results.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_TaxAudit_Blog.pdf" class="filename" target="_blank">MSFT_TaxAudit_Blog.pdf</a></td>
+                        <td><span class="category-badge">TAX MATTERS</span></td>
+                        <td><span class="priority-badge priority-high">9</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is a Microsoft blog post disclosing an ongoing IRS audit covering tax years 2004-2013, with the IRS proposing $28.9...</div>
+                                <div class="tooltip">This is a Microsoft blog post disclosing an ongoing IRS audit covering tax years 2004-2013, with the IRS proposing $28.9 billion in additional taxes plus penalties related to transfer pricing and profit allocation disputes. The document represents correspondence with tax authorities and tax audit documentation, which is critical for due diligence as it reveals significant potential tax liabilities and ongoing disputes that could materially impact the company&#39;s financial position.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_TaxAudit_Blog.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_ConsentOfAccountingFirm.pdf" class="filename" target="_blank">MSFT_ConsentOfAccountingFirm.pdf</a></td>
+                        <td><span class="category-badge">AUDIT DOCUMENTATION</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is a Consent of Independent Registered Public Accounting Firm from Deloitte & Touche LLP, dated July 30, 2025, cons...</div>
+                                <div class="tooltip">This is a Consent of Independent Registered Public Accounting Firm from Deloitte & Touche LLP, dated July 30, 2025, consenting to the incorporation by reference of their audit reports on Microsoft Corporation&#39;s financial statements and internal controls in various SEC registration statements. This document is critical for due diligence as it confirms the auditor&#39;s formal consent and validates the reliability of audited financial statements that would be heavily relied upon in M&A analysis.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_ConsentOfAccountingFirm.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_Cybersecurity_Notice.pdf" class="filename" target="_blank">MSFT_Cybersecurity_Notice.pdf</a></td>
+                        <td><span class="category-badge">REGULATORY MATTERS</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 85%"></div>
+                            </div>
+                            85%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is a Microsoft SEC filing (Exhibit 99.1) disclosing a cybersecurity incident involving a Russian state-sponsored th...</div>
+                                <div class="tooltip">This is a Microsoft SEC filing (Exhibit 99.1) disclosing a cybersecurity incident involving a Russian state-sponsored threat actor called Midnight Blizzard that compromised corporate email systems and accessed source code repositories. The document represents mandatory regulatory disclosure of a material cybersecurity event, which is highly relevant for M&A due diligence as it reveals significant security vulnerabilities, ongoing threats, and potential liabilities that could impact the target company&#39;s valuation and risk profile.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_Cybersecurity_Notice.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_DeferredCompensationPlan.pdf" class="filename" target="_blank">MSFT_DeferredCompensationPlan.pdf</a></td>
+                        <td><span class="category-badge">EMPLOYEES</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft's Deferred Compensation Plan document, amended and restated effective April 1, 2024, which allows sele...</div>
+                                <div class="tooltip">This is Microsoft&#39;s Deferred Compensation Plan document, amended and restated effective April 1, 2024, which allows select executives and highly compensated employees to defer receipt of certain compensation including base salary and bonuses. The plan is a key component of executive compensation structure and represents significant contingent liabilities for the company, making it highly relevant for understanding total compensation costs and obligations in M&A due diligence.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_DeferredCompensationPlan.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_SUBSIDIARIES-OF-REGISTRANT.pdf" class="filename" target="_blank">MSFT_SUBSIDIARIES-OF-REGISTRANT.pdf</a></td>
+                        <td><span class="category-badge">CORPORATE</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft Corporation's official Exhibit 21 filing listing subsidiaries as of June 30, 2025, which corresponds t...</div>
+                                <div class="tooltip">This is Microsoft Corporation&#39;s official Exhibit 21 filing listing subsidiaries as of June 30, 2025, which corresponds to the &quot;Organizational charts&quot; subcategory under Corporate documents. The document provides critical corporate structure information showing significant subsidiaries across different jurisdictions (US and Ireland), including major acquisitions like LinkedIn and Activision Blizzard, which is essential for understanding the target&#39;s legal entity structure in M&A due diligence.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_SUBSIDIARIES-OF-REGISTRANT.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_InsiderTradingPolicy.pdf" class="filename" target="_blank">MSFT_InsiderTradingPolicy.pdf</a></td>
+                        <td><span class="category-badge">EMPLOYEES</span></td>
+                        <td><span class="priority-badge priority-medium">7</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft's General Insider Trading Policy (Exhibit 19.1) that governs employee trading restrictions when in pos...</div>
+                                <div class="tooltip">This is Microsoft&#39;s General Insider Trading Policy (Exhibit 19.1) that governs employee trading restrictions when in possession of material, nonpublic information. The document outlines comprehensive compliance requirements, enforcement mechanisms, and applies to all employees, making it a key HR policy document that buyers would review to understand corporate governance and employee compliance frameworks during due diligence.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_InsiderTradingPolicy.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_10K_LegalProceedings_2025.pdf" class="filename" target="_blank">MSFT_10K_LegalProceedings_2025.pdf</a></td>
+                        <td><span class="category-badge">LITIGATION</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This document contains Microsoft's 10-K filing disclosure of legal proceedings, specifically detailing an ongoing Irish ...</div>
+                                <div class="tooltip">This document contains Microsoft&#39;s 10-K filing disclosure of legal proceedings, specifically detailing an ongoing Irish Data Protection Commission investigation against LinkedIn for GDPR violations with an assessed fine currently under appeal, and other general litigation contingencies totaling $541 million in accrued liabilities with potential additional exposure of $600 million. This type of litigation disclosure is critical for M&A due diligence as it reveals significant pending legal matters, regulatory compliance issues, and quantified financial exposure that could materially impact the target company&#39;s valuation and risk profile.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_10K_LegalProceedings_2025.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_10K_Acquisition_AB.pdf" class="filename" target="_blank">MSFT_10K_Acquisition_AB.pdf</a></td>
+                        <td><span class="category-badge">FINANCIAL STATEMENTS</span></td>
+                        <td><span class="priority-badge priority-high">10</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft's 10-K filing documenting their completed $75.4 billion acquisition of Activision Blizzard, including ...</div>
+                                <div class="tooltip">This is Microsoft&#39;s 10-K filing documenting their completed $75.4 billion acquisition of Activision Blizzard, including detailed purchase price allocation, asset and liability breakdowns, and pro forma financial results. This represents audited financial statement disclosure of a major business combination with comprehensive financial data critical for understanding the transaction&#39;s impact on Microsoft&#39;s consolidated financial position.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_10K_Acquisition_AB.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT-OpenAI_Partnership_Blog.pdf" class="filename" target="_blank">MSFT-OpenAI_Partnership_Blog.pdf</a></td>
+                        <td><span class="category-badge">CONTRACTS</span></td>
+                        <td><span class="priority-badge priority-high">10</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This document details a major partnership agreement amendment between Microsoft and OpenAI, including IP rights, revenue...</div>
+                                <div class="tooltip">This document details a major partnership agreement amendment between Microsoft and OpenAI, including IP rights, revenue sharing arrangements, and a $250B Azure services contract. As a material partnership agreement with significant financial commitments and strategic implications, this would be critical for understanding key commercial relationships and future obligations in any M&A due diligence process.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT-OpenAI_Partnership_Blog.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_10K_Properties.pdf" class="filename" target="_blank">MSFT_10K_Properties.pdf</a></td>
+                        <td><span class="category-badge">PROPERTIES</span></td>
+                        <td><span class="priority-badge priority-medium">7</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft's 10-K filing excerpt detailing their real estate holdings, including 97 million square feet of owned ...</div>
+                                <div class="tooltip">This is Microsoft&#39;s 10-K filing excerpt detailing their real estate holdings, including 97 million square feet of owned and leased properties across domestic and international locations. The document provides a comprehensive breakdown of property locations, square footage, and ownership structure which is essential for assessing the target company&#39;s real estate assets and lease obligations in M&A due diligence.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_10K_Properties.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_Registrants_Securities_Description.pdf" class="filename" target="_blank">MSFT_Registrants_Securities_Description.pdf</a></td>
+                        <td><span class="category-badge">CORPORATE</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is Microsoft Corporation's official description of securities registered under Section 12 of the Securities Exchang...</div>
+                                <div class="tooltip">This is Microsoft Corporation&#39;s official description of securities registered under Section 12 of the Securities Exchange Act of 1934, detailing the company&#39;s capital structure including common stock (24 billion authorized shares at $0.00000625 par value) and two series of Euro-denominated notes. The document provides comprehensive information about voting rights, dividend rights, liquidation rights, and detailed terms of the debt securities, which is essential for understanding the target company&#39;s capitalization structure and outstanding obligations in M&A due diligence.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_Registrants_Securities_Description.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><a href="file:///Users/stephenbookneg/Documents/dd-prototype/data/real_dd_test/MSFT_RegistrationRights_Agreement.pdf" class="filename" target="_blank">MSFT_RegistrationRights_Agreement.pdf</a></td>
+                        <td><span class="category-badge">LIABILITIES</span></td>
+                        <td><span class="priority-badge priority-high">8</span></td>
+                        <td>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 95%"></div>
+                            </div>
+                            95%
+                        </td>
+                        <td>
+                            <div class="summary-cell">
+                                <div class="summary-preview">This is a Registration Rights Agreement dated November 6, 2023, between Microsoft Corporation and various dealer manager...</div>
+                                <div class="tooltip">This is a Registration Rights Agreement dated November 6, 2023, between Microsoft Corporation and various dealer managers relating to Microsoft&#39;s exchange offer of new notes for outstanding Activision Blizzard notes following the acquisition. The agreement establishes registration obligations, indemnification provisions, and potential interest rate increases for registration defaults, representing significant contingent liabilities and ongoing contractual obligations that are highly relevant for M&A due diligence assessment.</div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="notes-input" 
+                                   data-filename="MSFT_RegistrationRights_Agreement.pdf" 
+                                   value=""
+                                   placeholder="Add notes..."
+                                   onblur="saveNote(this)">
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                No documents match your filters
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let sortColumn = -1;
+        let sortAscending = true;
+        
+        function sortTable(columnIndex) {
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle direction if same column, otherwise ascending
+            if (sortColumn === columnIndex) {
+                sortAscending = !sortAscending;
+            } else {
+                sortAscending = true;
+                sortColumn = columnIndex;
+            }
+            
+            // Update header classes
+            table.querySelectorAll('th').forEach((th, idx) => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (idx === columnIndex) {
+                    th.classList.add(sortAscending ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                if (columnIndex === 0) {
+                    // Filename - text in link
+                    aVal = a.cells[0].querySelector('a').textContent.toLowerCase();
+                    bVal = b.cells[0].querySelector('a').textContent.toLowerCase();
+                } else if (columnIndex === 1) {
+                    // Category - text in badge
+                    aVal = a.cells[1].textContent.trim().toLowerCase();
+                    bVal = b.cells[1].textContent.trim().toLowerCase();
+                } else if (columnIndex === 2 || columnIndex === 3) {
+                    // Priority or Confidence - numeric
+                    aVal = parseInt(a.cells[columnIndex].textContent.trim());
+                    bVal = parseInt(b.cells[columnIndex].textContent.trim());
+                } else {
+                    aVal = a.cells[columnIndex].textContent.toLowerCase();
+                    bVal = b.cells[columnIndex].textContent.toLowerCase();
+                }
+                
+                if (aVal < bVal) return sortAscending ? -1 : 1;
+                if (aVal > bVal) return sortAscending ? 1 : -1;
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const filename = row.cells[0].textContent.toLowerCase();
+                const category = row.cells[1].textContent.trim();
+                const priority = parseInt(row.cells[2].textContent.trim());
+                const summary = row.cells[4].textContent.toLowerCase();
+                
+                let show = true;
+                
+                if (searchTerm && !filename.includes(searchTerm) && !summary.includes(searchTerm)) {
+                    show = false;
+                }
+                
+                if (categoryFilter && category !== categoryFilter) {
+                    show = false;
+                }
+                
+                if (priorityFilter) {
+                    if (priorityFilter === 'high' && priority < 8) show = false;
+                    if (priorityFilter === 'medium' && (priority < 5 || priority > 7)) show = false;
+                    if (priorityFilter === 'low' && priority > 4) show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
+            });
+            
+            document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+        
+        function saveNote(input) {
+            const filename = input.dataset.filename;
+            const note = input.value.trim();
+            
+            // Visual feedback
+            input.classList.add('saved');
+            setTimeout(() => input.classList.remove('saved'), 1000);
+            
+            // Save to localStorage (fallback since we can't write to CSV from browser)
+            const notes = JSON.parse(localStorage.getItem('documentNotes') || '{}');
+            if (note) {
+                notes[filename] = note;
+            } else {
+                delete notes[filename];
+            }
+            localStorage.setItem('documentNotes', JSON.stringify(notes));
+            
+            console.log('Note saved for:', filename);
+        }
+        
+        // Load notes from localStorage on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const notes = JSON.parse(localStorage.getItem('documentNotes') || '{}');
+            document.querySelectorAll('.notes-input').forEach(input => {
+                const filename = input.dataset.filename;
+                if (notes[filename] && !input.value) {
+                    input.value = notes[filename];
+                }
+            });
+        });
+    </script>
+</body>
+</html>
